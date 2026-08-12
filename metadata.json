@@ -1,0 +1,8 @@
+{
+  "name": "Remix Smart Hospital Connectivity",
+  "description": "A comprehensive hospital management and patient connectivity platform designed to optimize OPD queues, token tracking, doctor schedules, patient monitoring, billing, and wayfinding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
