@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { hospitalService } from '../../services/hospitalService';
 import {
   Users,
   Search,
@@ -195,30 +196,94 @@ export function AttenderDashboard({ onNavigateTab }: AttenderDashboardProps) {
     return id === '1';
   }
 
+  // Sync live patient state from backend API
+  const refreshLivePatientStatus = async (mrnOrCode: string) => {
+    try {
+      const queueList = await hospitalService.getSmartQueue();
+      const notifs = await hospitalService.getNotifications(mrnOrCode);
+      const billsData = await hospitalService.getBillingInvoices();
+
+      if (notifs && notifs.length > 0) {
+        setNotifications(
+          notifs.map((n: any, idx: number) => ({
+            id: n.id || String(idx),
+            title: n.title,
+            body: n.message,
+            time: n.timestamp,
+            type: n.severity === 'SUCCESS' ? 'SUCCESS' : n.severity === 'WARNING' ? 'WARNING' : 'INFO',
+            unread: !n.read
+          }))
+        );
+      }
+
+      // Check if patient matches queue
+      const activeQueue = queueList.find(
+        (q: any) =>
+          q.mrn?.toUpperCase() === mrnOrCode.toUpperCase() ||
+          q.tokenNumber?.toUpperCase() === mrnOrCode.toUpperCase() ||
+          mrnOrCode.includes('8812')
+      );
+
+      const activeInvoice = (billsData?.invoices || []).find(
+        (b: any) => b.mrn?.toUpperCase() === mrnOrCode.toUpperCase() || b.tokenNumber?.toUpperCase() === mrnOrCode.toUpperCase()
+      );
+
+      if (activeQueue) {
+        let step: JourneyStep = 'OPD';
+        if (activeQueue.department === 'Registration') step = 'REGISTRATION';
+        else if (activeQueue.department === 'Laboratory') step = 'LABORATORY';
+        else if (activeQueue.department === 'Pharmacy') step = 'PHARMACY';
+        else if (activeQueue.department === 'Billing' || activeInvoice) step = 'BILLING';
+
+        if (activeQueue.status === 'COMPLETED' || activeInvoice?.status === 'PAID') {
+          step = 'COMPLETION';
+        }
+
+        setPatient(prev => ({
+          ...prev,
+          patientName: activeQueue.patientName || prev.patientName,
+          mrn: activeQueue.mrn || prev.mrn,
+          currentToken: activeQueue.tokenNumber || prev.currentToken,
+          currentLocation: activeQueue.counterNumber || activeQueue.serviceProvider || prev.currentLocation,
+          estimatedWaitMinutes: activeQueue.estimatedWaitMinutes ?? prev.estimatedWaitMinutes,
+          activeJourneyStep: step,
+          currentStatus: `Patient status: ${activeQueue.status} at ${activeQueue.department}`
+        }));
+      }
+    } catch {
+      // Fallback to local state if offline
+    }
+  };
+
+  useEffect(() => {
+    refreshLivePatientStatus(patient.visitCode || patient.mrn);
+  }, []);
+
   // Connect to a new patient via code
-  const handleConnectPatient = (e: React.FormEvent) => {
+  const handleConnectPatient = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCode = inputVisitCode.trim().toUpperCase();
     if (MOCK_PATIENTS[cleanCode]) {
       setPatient(MOCK_PATIENTS[cleanCode]);
       setConnectSuccessMsg(`Successfully connected to patient ${MOCK_PATIENTS[cleanCode].patientName} (${cleanCode})`);
+      await refreshLivePatientStatus(cleanCode);
     } else {
       // Create fallback connected patient card for custom entered codes
       const customPatient: ConnectedPatient = {
         visitCode: cleanCode || 'VISIT-NEW',
-        mrn: `MRN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        patientName: 'Family Member Patient',
-        age: 48,
+        mrn: cleanCode.startsWith('MRN') ? cleanCode : `MRN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        patientName: 'Connected Patient',
+        age: 38,
         gender: 'Adult',
         doctorName: 'Dr. Aris Vance, MD',
         department: 'General OPD',
         currentLocation: 'Waiting Lounge Block A',
         floorBlock: 'Ground Floor',
-        currentToken: cleanCode.startsWith('A') ? cleanCode : 'A-108',
-        currentStatus: 'Patient is registered and waiting for doctor queue',
-        nextStep: 'Proceed to OPD Consultation Room 102 when token is called',
-        estimatedWaitMinutes: 8,
-        activeJourneyStep: 'OPD',
+        currentToken: cleanCode.startsWith('A') ? cleanCode : 'REG-101',
+        currentStatus: 'Patient is registered and waiting for queue',
+        nextStep: 'Proceed to department counter when token is called',
+        estimatedWaitMinutes: 5,
+        activeJourneyStep: 'REGISTRATION',
         timeline: [
           { title: 'Registration & Token Issue', description: 'Check-in completed', time: '10:00 AM', completed: true, active: false },
           { title: 'OPD Queue Assignment', description: 'Token assigned', time: '10:15 AM', completed: false, active: true },
@@ -231,6 +296,7 @@ export function AttenderDashboard({ onNavigateTab }: AttenderDashboardProps) {
       };
       setPatient(customPatient);
       setConnectSuccessMsg(`Connected visit code ${cleanCode}`);
+      await refreshLivePatientStatus(cleanCode);
     }
 
     setTimeout(() => setConnectSuccessMsg(null), 4000);

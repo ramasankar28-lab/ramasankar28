@@ -13,7 +13,7 @@ export interface CreateAppointmentInput {
 
 export const appointmentService = {
   async getAllAppointments(filter?: { doctorId?: string; patientId?: string; date?: string }) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.appointment.findMany({
         where: {
@@ -35,7 +35,7 @@ export const appointmentService = {
   async createAppointment(input: CreateAppointmentInput) {
     validateRequiredFields(input, ['patientId', 'doctorId', 'date', 'timeSlot']);
 
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const appointment = await prisma.appointment.create({
         data: {
@@ -62,7 +62,7 @@ export const appointmentService = {
 
   async updateStatus(appointmentId: string, status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW') {
     if (!appointmentId) throw new ValidationError('Appointment ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.appointment.update({
         where: { id: appointmentId },

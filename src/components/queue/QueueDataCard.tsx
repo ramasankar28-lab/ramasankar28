@@ -6,6 +6,7 @@ import { Card, CardContent } from '../ui/Card';
 import { Clock, User, Building2, Stethoscope, ArrowRightLeft, ShieldAlert } from 'lucide-react';
 
 interface QueueDataCardProps {
+  key?: React.Key;
   item: SmartQueueItem;
   onCallNext?: (id: string) => void;
   onSkip?: (id: string) => void;

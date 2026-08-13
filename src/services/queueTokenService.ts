@@ -11,7 +11,7 @@ export interface IssueTokenInput {
 
 export const queueTokenService = {
   async getAllQueues() {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.queue.findMany({
         include: {
@@ -30,7 +30,7 @@ export const queueTokenService = {
   },
 
   async getAllTokens(doctorId?: string, status?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.token.findMany({
         where: {
@@ -46,7 +46,7 @@ export const queueTokenService = {
 
   async issueToken(input: IssueTokenInput) {
     validateRequiredFields(input, ['departmentId']);
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
 
     try {
       // Find or create active queue for department/doctor
@@ -81,7 +81,7 @@ export const queueTokenService = {
         where: { queueId: queue.id, status: 'WAITING' }
       });
 
-      let avgMins = dept ? dept.avgWaitTimeMins : 10;
+      let avgMins = dept ? (dept.avgWaitTimeMinutes || dept.avgWaitTimeMins || 10) : 10;
       let estWait = waitingCount * avgMins;
       if (input.priority === 'EMERGENCY') estWait = 0;
       if (input.priority === 'SENIOR_CITIZEN') estWait = Math.floor(estWait * 0.5);
@@ -134,7 +134,7 @@ export const queueTokenService = {
 
   async updateTokenStatus(tokenId: string, status: 'WAITING' | 'CALLING' | 'IN_CONSULTATION' | 'COMPLETED' | 'SKIPPED' | 'CANCELLED', counterNumber?: string) {
     if (!tokenId) throw new ValidationError('Token ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
 
     try {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

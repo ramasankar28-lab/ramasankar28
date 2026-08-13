@@ -18,7 +18,7 @@ export interface CreatePrescriptionInput {
 
 export const pharmacyService = {
   async getPrescriptions(patientId?: string, status?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.prescription.findMany({
         where: {
@@ -38,7 +38,7 @@ export const pharmacyService = {
   },
 
   async getInventory() {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.medicineInventory.findMany({
         orderBy: { name: 'asc' }
@@ -54,7 +54,7 @@ export const pharmacyService = {
       throw new ValidationError('At least one prescribed medicine is required');
     }
 
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const todayStr = new Date().toISOString().split('T')[0];
       const prescription = await prisma.prescription.create({
@@ -87,7 +87,7 @@ export const pharmacyService = {
 
   async updatePrescriptionStatus(prescriptionId: string, status: 'DRAFT' | 'ISSUED' | 'PREPARING' | 'READY_FOR_PICKUP' | 'DISPENSED' | 'CANCELLED') {
     if (!prescriptionId) throw new ValidationError('Prescription ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.prescription.update({
         where: { id: prescriptionId },

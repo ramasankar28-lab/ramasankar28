@@ -13,7 +13,7 @@ export interface CreatePatientRecordInput {
 export const patientRecordService = {
   async getPatientRecords(patientId: string) {
     if (!patientId) throw new ValidationError('Patient ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.patientRecord.findMany({
         where: { patientId },
@@ -29,7 +29,7 @@ export const patientRecordService = {
 
   async createRecord(input: CreatePatientRecordInput) {
     validateRequiredFields(input, ['patientId', 'doctorId', 'recordType', 'title', 'description']);
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.patientRecord.create({
         data: {

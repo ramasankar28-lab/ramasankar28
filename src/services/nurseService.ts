@@ -16,7 +16,7 @@ export interface RecordVitalInput {
 
 export const nurseService = {
   async getAllNurses(departmentId?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.nurse.findMany({
         where: departmentId ? { departmentId } : undefined,
@@ -41,7 +41,7 @@ export const nurseService = {
       alertStatus = 'WARNING';
     }
 
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const vitals = await prisma.vitalSign.create({
         data: {
@@ -67,7 +67,7 @@ export const nurseService = {
 
   async getTasksByNurse(nurseId: string) {
     if (!nurseId) throw new ValidationError('Nurse ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.nurseTask.findMany({
         where: { nurseId },
@@ -81,7 +81,7 @@ export const nurseService = {
 
   async updateTaskStatus(taskId: string, status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'DEFERRED') {
     if (!taskId) throw new ValidationError('Task ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.nurseTask.update({
         where: { id: taskId },

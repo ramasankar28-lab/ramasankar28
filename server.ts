@@ -1,11 +1,9 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import crypto from 'crypto';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const currentDir = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
 
 const app = express();
 app.use(express.json());
@@ -630,7 +628,7 @@ let pharmacyOrders = [
   }
 ];
 
-let billingInvoices = [
+let billingInvoices: any[] = [
   {
     id: 'inv-901',
     invoiceNumber: 'INV-2026-0041',
@@ -754,95 +752,320 @@ let billingInvoices = [
 const hospitalLocations = [
   {
     id: 'loc-1',
-    name: 'Main Registration & Token Kiosk',
-    category: 'REGISTRATION',
+    name: 'Main Entrance & Security Gate',
+    category: 'ENTRY',
     floor: 'Ground Floor',
     wing: 'Central Atrium',
-    directionSteps: ['Enter main hospital glass gate', 'Head straight 20 meters', 'Kiosk screens located opposite Helpdesk'],
-    queueWaitMins: 2,
-    activeCounters: 4,
-    openHours: '24/7'
+    x: 12,
+    y: 82,
+    description: 'Primary public entry point with security clearance, wheelchair assistance, and info desk.',
+    directionSteps: [
+      'Enter through the main glass revolving doors at the drop-off zone.',
+      'Wheelchair desk and visitor pass counter are directly on your right.'
+    ],
+    queueWaitMins: 0,
+    activeCounters: 2,
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'LOW',
+    servicesOffered: ['Visitor Pass', 'Wheelchair Support', 'General Inquiries', 'Valet Parking'],
+    contactExt: '1001',
+    phone: '+1 (555) 019-1001'
   },
   {
     id: 'loc-2',
-    name: 'General OPD & Consultations',
-    category: 'OPD',
+    name: 'Central Reception & Information Helpdesk',
+    category: 'REGISTRATION',
     floor: 'Ground Floor',
-    wing: 'Block A',
-    directionSteps: ['From atrium, turn left into Block A corridor', 'Rooms 101 to 115 are on the right side'],
-    queueWaitMins: 12,
-    activeCounters: 6,
-    openHours: '08:00 AM - 08:00 PM'
+    wing: 'Central Atrium',
+    x: 28,
+    y: 75,
+    description: 'Central helpdesk for general guidance, patient locator, and appointment verification.',
+    directionSteps: [
+      'Walk 15 meters straight from the Main Entrance into the Central Atrium.',
+      'Look for the circular blue illuminated "Reception & Guidance" counter.'
+    ],
+    queueWaitMins: 1,
+    activeCounters: 3,
+    openHours: '07:00 AM - 10:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'LOW',
+    servicesOffered: ['Patient Search', 'Attendant Guidance', 'Maps & Wayfinding Assistance'],
+    contactExt: '1002',
+    phone: '+1 (555) 019-1002'
   },
   {
     id: 'loc-3',
-    name: 'Central Pharmacy & Medicine Dispense',
-    category: 'PHARMACY',
+    name: 'Patient Registration & Token Kiosk',
+    category: 'REGISTRATION',
     floor: 'Ground Floor',
-    wing: 'Block B (Near Exit)',
-    directionSteps: ['Walk past Billing counters', 'Turn right towards Block B Exit', 'Express pickup counters #1-#4'],
-    queueWaitMins: 5,
+    wing: 'Central Atrium',
+    x: 42,
+    y: 68,
+    description: 'Issue queue tokens for OPD, new patient MRN registration, and senior citizen priority counters.',
+    directionSteps: [
+      'From Central Reception, head toward Counter #1-#4.',
+      'Touchscreens available for self-service digital token generation.'
+    ],
+    queueWaitMins: 4,
     activeCounters: 4,
-    openHours: '24/7'
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['New Patient Registration', 'Smart Queue Token Generation', 'Senior Citizen Priority'],
+    contactExt: '1003',
+    phone: '+1 (555) 019-1003'
   },
   {
     id: 'loc-4',
+    name: 'General OPD (Internal Medicine & Family Care)',
+    category: 'OPD',
+    floor: 'Ground Floor',
+    wing: 'Block A (North Corridor)',
+    x: 65,
+    y: 72,
+    description: 'Outpatient consultations for general health, fever, routine checkups, and triage.',
+    directionSteps: [
+      'From Registration Kiosk, walk down Block A corridor on your left.',
+      'Rooms 101 to 112 are located along both sides of the illuminated walkway.'
+    ],
+    queueWaitMins: 18,
+    activeCounters: 6,
+    openHours: '08:00 AM - 08:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'HIGH',
+    doctorsList: ['Dr. Aris Vance, MD', 'Dr. Sarah Jenkins, MD', 'Dr. Robert Blake, MBBS'],
+    servicesOffered: ['General Consultation', 'Blood Pressure Check', 'Routine Prescriptions', 'Follow-up Reviews'],
+    contactExt: '1004',
+    phone: '+1 (555) 019-1004'
+  },
+  {
+    id: 'loc-5',
+    name: 'Specialist OPD (Cardiology, Ortho & Neuro)',
+    category: 'OPD',
+    floor: '1st Floor',
+    wing: 'Block A (South Corridor)',
+    x: 58,
+    y: 38,
+    description: 'Specialized medical consultations including Cardiology, Orthopedics, Pediatrics, and Neurology.',
+    directionSteps: [
+      'Take Elevator A or the central Escalator up to Floor 1.',
+      'Turn right into Block A South Corridor. Consultation suites 201-215.'
+    ],
+    queueWaitMins: 25,
+    activeCounters: 5,
+    openHours: '09:00 AM - 06:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'HIGH',
+    doctorsList: ['Dr. Michael Chen, DCH (Pediatrics)', 'Dr. Elena Rostova, MD (Cardiology)', 'Dr. Marcus Brody, MS (Ortho)'],
+    servicesOffered: ['Specialist Consultations', 'ECG Analysis', 'Joint & Bone Evaluations', 'Pediatric Wellness'],
+    contactExt: '1005',
+    phone: '+1 (555) 019-1005'
+  },
+  {
+    id: 'loc-6',
+    name: 'Pathology & Diagnostic Laboratory',
+    category: 'LABORATORY',
+    floor: '1st Floor',
+    wing: 'Block B (East Wing)',
+    x: 78,
+    y: 35,
+    description: 'Blood sample collection, urine/tissue testing, biochemistry, and automated lab processing.',
+    directionSteps: [
+      'Take Elevator A or B to the 1st Floor.',
+      'Follow the solid BLUE tactile path on the floor towards Block B East Wing.',
+      'Report to Sample Collection Desks L-01 through L-06.'
+    ],
+    queueWaitMins: 10,
+    activeCounters: 4,
+    openHours: '07:00 AM - 09:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['Blood Sample Draw', 'CBC & Lipid Profiles', 'HbA1c Diabetes Testing', 'Stat PCR Tests'],
+    contactExt: '1006',
+    phone: '+1 (555) 019-1006'
+  },
+  {
+    id: 'loc-7',
+    name: 'Central Pharmacy & Express Dispense',
+    category: 'PHARMACY',
+    floor: 'Ground Floor',
+    wing: 'Block B (Near Exit Gate)',
+    x: 82,
+    y: 78,
+    description: '24/7 hospital pharmacy offering OPD medication dispensing, express pickup counters, and drug consultation.',
+    directionSteps: [
+      'Walk past Central Billing towards the exit corridor in Block B.',
+      'Pharmacy Counters #1 to #5 are on the left, Express Pickup at Counter #2.'
+    ],
+    queueWaitMins: 6,
+    activeCounters: 5,
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['Prescription Dispensing', 'Express QR Pickup', 'OTC Medicines', 'Pharmacist Consultation'],
+    contactExt: '1007',
+    phone: '+1 (555) 019-1007'
+  },
+  {
+    id: 'loc-8',
     name: 'Central Billing & Cashless Desk',
     category: 'BILLING',
     floor: 'Ground Floor',
     wing: 'Central Atrium',
-    directionSteps: ['Located adjacent to main helpdesk', 'Counters #1 to #6 for cash/UPI/insurance'],
-    queueWaitMins: 4,
+    x: 45,
+    y: 52,
+    description: 'Payment counters for cash, UPI, card payments, insurance approvals, and inpatient billing.',
+    directionSteps: [
+      'Located directly in Central Atrium opposite Main Elevators.',
+      'Billing Desk #1-#6 with dedicated UPI QR quick kiosks.'
+    ],
+    queueWaitMins: 5,
     activeCounters: 5,
-    openHours: '24/7'
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'LOW',
+    servicesOffered: ['OPD Billing', 'IPD Discharge Deposit', 'UPI Fast-Pay Kiosks', 'Insurance Pre-Authorization'],
+    contactExt: '1008',
+    phone: '+1 (555) 019-1008'
   },
   {
-    id: 'loc-5',
-    name: 'Pathology & Diagnostic Laboratory',
-    category: 'LABORATORY',
-    floor: '1st Floor',
-    wing: 'Block A',
-    directionSteps: ['Take Elevator A to Floor 1', 'Turn right, follow blue line on floor for Blood Collection Lab'],
-    queueWaitMins: 8,
-    activeCounters: 3,
-    openHours: '07:00 AM - 09:00 PM'
-  },
-  {
-    id: 'loc-6',
-    name: 'Radiology (X-Ray, MRI, CT Scan)',
-    category: 'RADIOLOGY',
-    floor: 'Basement 1',
-    wing: 'Diagnostic Wing',
-    directionSteps: ['Take Elevator B to Basement -1', 'Follow green wall signboards to Radiology Suite'],
-    queueWaitMins: 15,
-    activeCounters: 2,
-    openHours: '24/7'
-  },
-  {
-    id: 'loc-7',
-    name: 'Emergency Trauma & Urgent Care Unit',
+    id: 'loc-9',
+    name: 'Emergency & Trauma Care Unit',
     category: 'EMERGENCY',
     floor: 'Ground Floor',
-    wing: 'East Gate Emergency Wing',
-    directionSteps: ['Enter directly through East Gate Ramp', 'Red line on floor leads directly to Triage Room 01'],
+    wing: 'East Emergency Wing',
+    x: 88,
+    y: 22,
+    description: '24/7 acute trauma center, emergency resuscitation, cardiac arrest care, and immediate triage.',
+    directionSteps: [
+      'Enter directly via the East Gate Ambulance Bay Ramp.',
+      'Follow the continuous RED tactile stripe on the floor straight into Emergency Triage.'
+    ],
     queueWaitMins: 0,
     activeCounters: 6,
-    openHours: '24/7 Priority Emergency'
+    openHours: '24/7 Priority Emergency',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'HIGH',
+    doctorsList: ['Dr. Victor Stone, ER Lead', 'Dr. Maya Lin, Trauma Specialist'],
+    servicesOffered: ['Immediate Triage', 'Trauma Surgery', 'Cardiac Stabilization', 'Poison & Burn Unit'],
+    contactExt: '9999',
+    phone: '+1 (555) 019-9999'
   },
   {
-    id: 'loc-8',
-    name: 'Inpatient Wards & CCU Complex',
+    id: 'loc-10',
+    name: 'Intensive Care Unit (ICU & CCU)',
+    category: 'CLINICAL',
+    floor: '2nd Floor',
+    wing: 'Critical Care Block B',
+    x: 72,
+    y: 28,
+    description: 'High-dependency critical care facility with continuous multi-para telemetry monitoring and negative pressure rooms.',
+    directionSteps: [
+      'Take Elevator C (Dedicated Medical Elevator) to Floor 2.',
+      'Pass through double restricted glass doors into ICU/CCU Complex.'
+    ],
+    queueWaitMins: 0,
+    activeCounters: 2,
+    openHours: 'Restricted Access (Attendant Hours: 11AM-12PM & 5PM-6PM)',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'LOW',
+    doctorsList: ['Dr. Sarah Jenkins, MD (Intensivist)', 'Dr. Alan Harper, Critical Care'],
+    servicesOffered: ['Ventilator Support', 'Continuous Hemodynamic Monitoring', 'Post-Op Critical Care'],
+    contactExt: '2001',
+    phone: '+1 (555) 019-2001'
+  },
+  {
+    id: 'loc-11',
+    name: 'Inpatient Wards (Wards A, B & C)',
     category: 'WARD',
-    floor: '2nd & 3rd Floors',
+    floor: '2nd Floor',
     wing: 'Block C Inpatient Tower',
-    directionSteps: ['Take Central Elevator C to Floor 2', 'Ward Alpha (Rooms 201-230) & ICU Wing on the left'],
+    x: 32,
+    y: 42,
+    description: 'General inpatient wards, semi-private rooms, and deluxe single suites.',
+    directionSteps: [
+      'Take Elevator B or C to Floor 2.',
+      'Follow green signs into Inpatient Tower Block C.'
+    ],
     queueWaitMins: 0,
     activeCounters: 3,
-    openHours: 'Visiting Hours: 04:00 PM - 07:00 PM'
+    openHours: 'Visiting Hours: 04:00 PM - 07:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['Post-Surgical Inpatient Recovery', 'Nursing Station Care', 'Attendant Comfort Lounges'],
+    contactExt: '2002',
+    phone: '+1 (555) 019-2002'
+  },
+  {
+    id: 'loc-12',
+    name: 'Atrium Family Waiting Area & Quiet Lounge',
+    category: 'AMENITY',
+    floor: 'Ground Floor',
+    wing: 'Central Atrium',
+    x: 52,
+    y: 58,
+    description: 'Comfortable air-conditioned seating lounge with mobile charging stations, live queue display screens, and water stations.',
+    directionSteps: [
+      'Located directly in Central Atrium right behind Registration & Billing.',
+      'Capacity for 150+ visitors with charging docks.'
+    ],
+    queueWaitMins: 0,
+    activeCounters: 1,
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['Live Queue Display Screens', 'Mobile Charging Outlets', 'RO Filtered Drinking Water', 'Comfortable Recliners'],
+    contactExt: '1010',
+    phone: '+1 (555) 019-1010'
+  },
+  {
+    id: 'loc-13',
+    name: 'Restrooms & Accessible Facilities',
+    category: 'AMENITY',
+    floor: 'Ground Floor',
+    wing: 'Block A Corridor',
+    x: 18,
+    y: 36,
+    description: 'Clean, sanitized restrooms equipped with wheelchair accessible stalls and baby diaper changing stations.',
+    directionSteps: [
+      'Located on every floor near elevator banks.',
+      'Ground floor restrooms are past the Reception desk on the left corridor.'
+    ],
+    queueWaitMins: 0,
+    activeCounters: 1,
+    openHours: '24/7',
+    openStatus: 'OPEN_24_7',
+    crowdLevel: 'LOW',
+    servicesOffered: ['Wheelchair Accessible Toilet', 'Baby Changing Station', 'Touchless Hand Wash'],
+    contactExt: '1011',
+    phone: '+1 (555) 019-1011'
+  },
+  {
+    id: 'loc-14',
+    name: 'Hospital Cafeteria & Coffee Lounge',
+    category: 'AMENITY',
+    floor: '1st Floor',
+    wing: 'Skybridge Wing',
+    x: 22,
+    y: 24,
+    description: 'Fresh healthy meals, dietary consultations, sandwiches, hot beverages, and visitor refreshments.',
+    directionSteps: [
+      'Take Escalator or Elevator A to 1st Floor.',
+      'Walk across the glass Skybridge toward the Cafeteria Lounge.'
+    ],
+    queueWaitMins: 3,
+    activeCounters: 3,
+    openHours: '06:30 AM - 11:00 PM',
+    openStatus: 'OPEN_NOW',
+    crowdLevel: 'MODERATE',
+    servicesOffered: ['Hygienic Meals & Snacks', 'Espresso & Herbal Tea', 'Dietary Meal Kits', 'Seating for 80+'],
+    contactExt: '1012',
+    phone: '+1 (555) 019-1012'
   }
 ];
 
-let medicalHistories = [
+let medicalHistories: any[] = [
   {
     id: 'mh-1',
     mrn: 'MRN-2026-8812',
@@ -1134,6 +1357,41 @@ app.post('/api/auth/register', (req, res) => {
 
   usersDatabase.push(newUser);
   const token = createSession(newUser.id);
+
+  // Automatically generate initial OPD / Registration token for new patient
+  if (targetRole === 'PATIENT') {
+    const regCount = smartQueueItems.filter((q) => q.department === 'Registration').length;
+    const initTokenNumber = `REG-${101 + regCount}`;
+    const newQueueToken = {
+      id: `sq-${Date.now()}`,
+      department: 'Registration',
+      tokenNumber: initTokenNumber,
+      patientName: newUser.name,
+      mrn: newMrn,
+      patientPhone: newUser.phone || '+1 (555) 000-1111',
+      serviceProvider: 'Registration Desk #1',
+      status: 'WAITING' as const,
+      arrivalTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      serviceDuration: 5,
+      priority: 'Low',
+      queuePosition: 1,
+      estimatedWaitMinutes: 5,
+      counterNumber: 'Registration Counter #1'
+    };
+    smartQueueItems.unshift(newQueueToken);
+    recalculateSmartQueuePositions('Registration');
+
+    notifications.unshift({
+      id: `notif-${Date.now()}`,
+      mrn: newMrn,
+      title: `Registration Token Generated: #${initTokenNumber}`,
+      message: `Welcome to Smart Hospital, ${newUser.name}! Your Registration Token #${initTokenNumber} has been issued.`,
+      category: 'TOKEN',
+      timestamp: 'Just now',
+      read: false,
+      severity: 'SUCCESS'
+    });
+  }
 
   return res.status(201).json({
     message: 'Account registered successfully',
@@ -2381,11 +2639,34 @@ app.post('/api/billing/pay/:id', (req, res) => {
   invoice.patientsAhead = 0;
   invoice.estimatedTimeMins = 0;
 
+  // Complete all active queue tokens for this patient
+  smartQueueItems.forEach((token) => {
+    if (token.mrn === invoice.mrn) {
+      token.status = 'COMPLETED';
+      token.estimatedWaitMinutes = 0;
+      token.queuePosition = 0;
+    }
+  });
+
+  // Store completed visit in medical histories
+  medicalHistories.unshift({
+    id: `hist-${Date.now()}`,
+    mrn: invoice.mrn,
+    patientName: invoice.patientName,
+    visitDate: new Date().toISOString().split('T')[0],
+    attendingDoctor: 'Dr. Aris Vance, MD',
+    department: 'General OPD',
+    chiefComplaint: 'Outpatient Consultation & Diagnostic Follow-up',
+    diagnosis: 'Acute Consultation Completed & Settled',
+    vitalsSummary: 'BP: 120/80 mmHg, Pulse: 72 bpm, SpO2: 98%, Temp: 98.6 °F',
+    prescriptionSummary: `Settled Invoice #${invoice.invoiceNumber}. Total paid: $${invoice.amount.toFixed(2)} (Receipt #${receiptNum}).`
+  });
+
   notifications.unshift({
     id: `notif-${Date.now()}`,
     mrn: invoice.mrn,
-    title: 'Payment Completed',
-    message: `Payment of $${invoice.amount.toFixed(2)} completed successfully via ${paymentMethod} for ${invoice.invoiceNumber}. Digital Receipt #${receiptNum} generated.`,
+    title: 'Payment Completed & Visit Discharge',
+    message: `Payment of $${invoice.amount.toFixed(2)} completed successfully via ${paymentMethod} for ${invoice.invoiceNumber}. Receipt #${receiptNum} generated. Visit journey marked COMPLETED!`,
     category: 'BILLING',
     timestamp: 'Just now',
     read: false,
@@ -2563,12 +2844,63 @@ app.post('/api/prescriptions', (req, res) => {
   };
   pharmacyOrders.unshift(newPharmacyOrder);
 
+  // Automatically add Pharmacy token to smart queue
+  const phmCount = smartQueueItems.filter((q) => q.department === 'Pharmacy').length;
+  const phmTokenNumber = `PHM-${201 + phmCount}`;
+  smartQueueItems.unshift({
+    id: `sq-${Date.now()}`,
+    department: 'Pharmacy',
+    tokenNumber: phmTokenNumber,
+    patientName: newPrescription.patientName,
+    mrn: newPrescription.mrn,
+    patientPhone: '+1 (555) 234-5678',
+    serviceProvider: 'Pharmacy Counter #2',
+    status: 'WAITING',
+    arrivalTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    serviceDuration: 6,
+    priority: 'Moderate',
+    queuePosition: 1,
+    estimatedWaitMinutes: 6,
+    counterNumber: 'Pharmacy Counter #2'
+  });
+  recalculateSmartQueuePositions('Pharmacy');
+
+  // Automatically add Pharmacy charge to active billing invoice or create a new invoice
+  let activeInv = billingInvoices.find(b => b.mrn === newPrescription.mrn && b.status !== 'PAID');
+  if (activeInv) {
+    activeInv.pharmacyCharges = (activeInv.pharmacyCharges || 0) + 25;
+    activeInv.amount = activeInv.consultationFee + activeInv.laboratoryCharges + activeInv.pharmacyCharges + activeInv.otherCharges;
+  } else {
+    const invCount = billingInvoices.length;
+    billingInvoices.unshift({
+      id: `inv-${Date.now()}`,
+      invoiceNumber: `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      tokenNumber: `BIL-${301 + invCount}`,
+      patientName: newPrescription.patientName,
+      mrn: newPrescription.mrn,
+      patientPhone: '+1 (555) 234-5678',
+      serviceType: 'Outpatient Consultation & Pharmacy',
+      consultationFee: 40,
+      laboratoryCharges: 0,
+      pharmacyCharges: 25,
+      otherCharges: 10,
+      amount: 75,
+      status: 'WAITING',
+      isDischargeBill: false,
+      counter: 'Billing Counter #1',
+      patientsAhead: 1,
+      estimatedTimeMins: 5,
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      notes: 'Auto-generated invoice including consultation & prescription charges.'
+    });
+  }
+
   // Send Notification
   notifications.unshift({
     id: `notif-${Date.now()}`,
     mrn: newPrescription.mrn,
     title: 'New e-Prescription Created',
-    message: `Prescription #${newPrescription.prescriptionNumber} for ${newPrescription.patientName} sent to Pharmacy.`,
+    message: `Prescription #${newPrescription.prescriptionNumber} for ${newPrescription.patientName} sent to Pharmacy. Token #${phmTokenNumber} issued.`,
     category: 'PHARMACY',
     timestamp: 'Just now',
     read: false,
@@ -2602,6 +2934,57 @@ app.post('/api/lab-reports', (req, res) => {
   };
 
   labReports.unshift(newLabOrder);
+
+  // Automatically add Laboratory token to smart queue
+  const labCount = smartQueueItems.filter((q) => q.department === 'Laboratory').length;
+  const labTokenNumber = `LAB-${101 + labCount}`;
+  smartQueueItems.unshift({
+    id: `sq-${Date.now()}`,
+    department: 'Laboratory',
+    tokenNumber: labTokenNumber,
+    patientName: newLabOrder.patientName,
+    mrn: newLabOrder.mrn,
+    patientPhone: '+1 (555) 234-5678',
+    serviceProvider: 'Pathology Lab Counter #4',
+    status: 'WAITING',
+    arrivalTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    serviceDuration: 8,
+    priority: 'Moderate',
+    queuePosition: 1,
+    estimatedWaitMinutes: 8,
+    counterNumber: 'Pathology Lab Counter #4'
+  });
+  recalculateSmartQueuePositions('Laboratory');
+
+  // Automatically add Lab charge to active billing invoice or create a new invoice
+  let activeInv = billingInvoices.find(b => b.mrn === newLabOrder.mrn && b.status !== 'PAID');
+  if (activeInv) {
+    activeInv.laboratoryCharges = (activeInv.laboratoryCharges || 0) + 35;
+    activeInv.amount = activeInv.consultationFee + activeInv.laboratoryCharges + activeInv.pharmacyCharges + activeInv.otherCharges;
+  } else {
+    const invCount = billingInvoices.length;
+    billingInvoices.unshift({
+      id: `inv-${Date.now()}`,
+      invoiceNumber: `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      tokenNumber: `BIL-${301 + invCount}`,
+      patientName: newLabOrder.patientName,
+      mrn: newLabOrder.mrn,
+      patientPhone: '+1 (555) 234-5678',
+      serviceType: 'Outpatient Consultation & Laboratory',
+      consultationFee: 40,
+      laboratoryCharges: 35,
+      pharmacyCharges: 0,
+      otherCharges: 10,
+      amount: 85,
+      status: 'WAITING',
+      isDischargeBill: false,
+      counter: 'Billing Counter #1',
+      patientsAhead: 1,
+      estimatedTimeMins: 5,
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      notes: 'Auto-generated invoice including consultation & laboratory charges.'
+    });
+  }
 
   notifications.unshift({
     id: `notif-${Date.now()}`,
@@ -2709,6 +3092,88 @@ app.get('/api/analytics', async (req, res) => {
         { departmentName: 'Pediatric & Child Care', doctorCount: 6, tokensIssued: 22 },
         { departmentName: 'Orthopedics & Joint Care', doctorCount: 4, tokensIssued: 15 }
       ]
+    });
+  }
+});
+
+// ==================== AI QUEUE PREDICTION ENGINE ENDPOINTS ====================
+
+app.get('/api/queue-prediction/history', async (req, res) => {
+  try {
+    const { getQueueHistory } = await import('./src/services/queuePredictionService.js');
+    res.json(getQueueHistory());
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch queue history dataset', message: err.message });
+  }
+});
+
+app.get('/api/queue-prediction/overview', async (req, res) => {
+  try {
+    const { getQueuePredictionOverview } = await import('./src/services/queuePredictionService.js');
+    const model = (req.query.model === 'ML_AI' ? 'ML_AI' : 'RULE_BASED') as any;
+    
+    const simulation = {
+      department: (req.query.simDept as any) || 'ALL',
+      arrivalSurgePercent: req.query.surge ? Number(req.query.surge) : 0,
+      counterChangeDelta: req.query.counterDelta ? Number(req.query.counterDelta) : 0,
+      dayOfWeek: req.query.dayOfWeek as string,
+      timeSlot: req.query.timeSlot as string
+    };
+
+    const overview = getQueuePredictionOverview(model, simulation);
+    res.json(overview);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to generate queue predictions', message: err.message });
+  }
+});
+
+app.post('/api/queue-prediction/apply-action', async (req, res) => {
+  try {
+    const { department, actionType } = req.body;
+    // Simulate real-time operational response (e.g., allocating +1 or +2 active counters)
+    res.json({
+      success: true,
+      message: `Action '${actionType || 'Capacity Expansion'}' executed for ${department || 'OPD'}. Active capacity expanded successfully!`,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to execute queue action', message: err.message });
+  }
+});
+
+app.post('/api/queue-prediction/ai-insights', async (req, res) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.json({
+        insight: "AI Optimization Summary: OPD is currently at CRITICAL density (86 waiting). Recommend shifting 2 non-critical general physicians from Ward Alpha to OPD Room 104 and opening Express Registration Kiosk #3 to reduce wait times by 42 minutes."
+      });
+    }
+
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey });
+    
+    const prompt = `You are the AI Queue Operations Specialist for Smart Hospital.
+Analyze the current hospital queues:
+- OPD: 86 waiting, 3 active doctors, avg 8 min consultation (Estimated wait ~229 mins)
+- Registration: 32 waiting, 4 active counters, avg 4 mins
+- Laboratory: 24 waiting, 3 active counters, avg 6 mins
+- Pharmacy: 41 waiting, 4 active counters, avg 5 mins
+- Billing: 18 waiting, 5 active counters, avg 3.5 mins
+
+Provide a concise 3-bullet strategic triage recommendation for hospital administration to optimize queue velocity and eliminate bottlenecks in the next 60 minutes. Keep it professional, urgent, and actionable.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    res.json({
+      insight: response.text || "AI Optimization Strategy generated successfully."
+    });
+  } catch (err: any) {
+    res.json({
+      insight: "AI Queue Triage: High traffic detected in OPD and Pharmacy. Recommended: Deploy float physician to Room 103 and activate Express Dispensing Counter #2 immediately."
     });
   }
 });

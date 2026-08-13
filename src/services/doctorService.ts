@@ -2,7 +2,7 @@ import { getPrismaClient, validateRequiredFields, ValidationError, NotFoundError
 
 export const doctorService = {
   async getAllDoctors(departmentId?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const doctors = await prisma.doctor.findMany({
         where: departmentId ? { departmentId } : undefined,
@@ -23,7 +23,7 @@ export const doctorService = {
 
   async getDoctorById(id: string) {
     if (!id) throw new ValidationError('Doctor ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const doctor = await prisma.doctor.findUnique({
         where: { id },
@@ -49,7 +49,7 @@ export const doctorService = {
 
   async updateAvailability(doctorId: string, isAvailable: boolean) {
     if (!doctorId) throw new ValidationError('Doctor ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.doctor.update({
         where: { id: doctorId },

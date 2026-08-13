@@ -157,7 +157,7 @@ export function StaffQueueView({
         {/* Quick Staff Department Call Button */}
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           <Button
-            variant="sky"
+            variant="primary"
             size="sm"
             onClick={() => onCallNext(undefined, selectedDept)}
             className="w-full sm:w-auto text-xs font-extrabold"

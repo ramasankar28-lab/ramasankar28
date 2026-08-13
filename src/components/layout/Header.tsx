@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Activity,
   UserCheck,
@@ -18,11 +18,17 @@ import {
   LogIn,
   User,
   ShieldCheck,
-  Users
+  Users,
+  Brain,
+  MessageSquare
 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
+import { appNotificationService } from '../../services/notificationService';
+import { messageService } from '../../services/messageService';
+import { NotificationDrawer } from '../notifications/NotificationDrawer';
+import { CommunicationCenterModal } from '../communication/CommunicationCenterModal';
 
 interface HeaderProps {
   activeTab: string;
@@ -31,12 +37,39 @@ interface HeaderProps {
 
 export function Header({ activeTab, setActiveTab }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
+  const [communicationModalOpen, setCommunicationModalOpen] = useState(false);
+
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
   const { user, isAuthenticated, logout } = useAuth();
+  const currentRole = user?.role || 'PATIENT';
+  const currentMrn = user?.mrn || 'MRN-88291';
+
+  useEffect(() => {
+    const updateCounts = () => {
+      const notifCount = appNotificationService.getUnreadCount(currentRole, currentMrn);
+      const msgCount = messageService.getUnreadMessagesCount(currentRole);
+      setUnreadNotifCount(notifCount);
+      setUnreadMessageCount(msgCount);
+    };
+
+    updateCounts();
+    const unsubNotif = appNotificationService.subscribe(updateCounts);
+    const unsubMsg = messageService.subscribe(updateCounts);
+
+    return () => {
+      unsubNotif();
+      unsubMsg();
+    };
+  }, [currentRole, currentMrn]);
 
   const navItems = [
     { id: 'landing', label: 'Home Landing', icon: Sparkles },
     { id: 'overview', label: 'Overview & Impact', icon: BarChart3 },
     { id: 'queue', label: 'Live OPD Queue', icon: Clock },
+    { id: 'prediction', label: 'AI Queue Predictor', icon: Brain },
     { id: 'navigation', label: 'Wayfinding & Counters', icon: MapPin },
     { id: 'doctors', label: 'Doctor Schedule', icon: Stethoscope },
     { id: 'nurses', label: 'Nurse Station', icon: HeartPulse },
@@ -106,10 +139,38 @@ export function Header({ activeTab, setActiveTab }: HeaderProps) {
             </div>
           </div>
 
-          {/* User Auth Status or Login Action */}
-          <div className="flex items-center space-x-3">
+          {/* User Auth Status, Notification Bell, & Messaging Center */}
+          <div className="flex items-center space-x-2">
+            {/* Communication Messages Button */}
+            <button
+              onClick={() => setCommunicationModalOpen(true)}
+              className="relative p-2 rounded-xl text-slate-600 hover:text-teal-700 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200/80 bg-slate-50"
+              title="Secure Hospital Messages & Clinical Handoff"
+            >
+              <MessageSquare className="h-5 w-5" />
+              {unreadMessageCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-teal-600 text-white font-extrabold text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-pulse">
+                  {unreadMessageCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Bell Button */}
+            <button
+              onClick={() => setNotificationDrawerOpen(true)}
+              className="relative p-2 rounded-xl text-slate-600 hover:text-sky-700 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200/80 bg-slate-50"
+              title="Notifications & Priority Alerts"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white font-extrabold text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-bounce">
+                  {unreadNotifCount}
+                </span>
+              )}
+            </button>
+
             {isAuthenticated && user ? (
-              <div className="flex items-center space-x-3 bg-slate-50 p-1.5 pl-3 rounded-xl border border-slate-200">
+              <div className="flex items-center space-x-2 bg-slate-50 p-1.5 pl-3 rounded-xl border border-slate-200">
                 <div className="text-right hidden sm:block">
                   <div className="text-xs font-bold text-slate-900 leading-tight">{user.name}</div>
                   <div className="text-[10px] text-teal-700 font-bold uppercase font-mono">{user.role} Dashboard</div>
@@ -267,6 +328,19 @@ export function Header({ activeTab, setActiveTab }: HeaderProps) {
           </div>
         </div>
       )}
+
+      {/* Notification Drawer Overlay */}
+      <NotificationDrawer
+        isOpen={notificationDrawerOpen}
+        onClose={() => setNotificationDrawerOpen(false)}
+        onNavigateTab={setActiveTab}
+      />
+
+      {/* Communication Center Modal */}
+      <CommunicationCenterModal
+        isOpen={communicationModalOpen}
+        onClose={() => setCommunicationModalOpen(false)}
+      />
     </header>
   );
 }

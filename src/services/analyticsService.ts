@@ -19,7 +19,7 @@ export interface HospitalAnalytics {
 
 export const analyticsService = {
   async getHospitalAnalytics(): Promise<HospitalAnalytics> {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
 
     try {
       const todayStr = new Date().toISOString().split('T')[0];

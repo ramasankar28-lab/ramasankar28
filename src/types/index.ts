@@ -300,13 +300,23 @@ export interface NurseShift {
 export interface HospitalLocation {
   id: string;
   name: string;
-  category: CounterCategory;
+  category: CounterCategory | 'AMENITY' | 'CLINICAL' | 'ENTRY' | 'WARD';
   floor: string;
   wing: string;
+  x: number;
+  y: number;
+  description?: string;
   directionSteps: string[];
   queueWaitMins: number;
   activeCounters: number;
   openHours: string;
+  openStatus?: 'OPEN_24_7' | 'OPEN_NOW' | 'CLOSING_SOON' | 'CLOSED';
+  crowdLevel?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  doctorsList?: string[];
+  servicesOffered?: string[];
+  contactExt?: string;
+  phone?: string;
+  iconName?: string;
 }
 
 export interface PharmacyOrder {

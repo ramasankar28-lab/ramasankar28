@@ -12,7 +12,7 @@ export interface CreateLabReportInput {
 
 export const labService = {
   async getLabTestCatalog() {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.labTest.findMany({
         orderBy: { name: 'asc' }
@@ -23,7 +23,7 @@ export const labService = {
   },
 
   async getLabReports(patientId?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.labReport.findMany({
         where: patientId ? { patientId } : undefined,
@@ -41,7 +41,7 @@ export const labService = {
 
   async createLabReport(input: CreateLabReportInput) {
     validateRequiredFields(input, ['patientId', 'doctorId', 'labTestId']);
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const todayStr = new Date().toISOString().split('T')[0];
       const report = await prisma.labReport.create({
@@ -65,7 +65,7 @@ export const labService = {
 
   async updateLabReportResults(reportId: string, testResults: string, status: string, remarks?: string, isCritical?: boolean) {
     if (!reportId) throw new ValidationError('Report ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const nowStr = new Date().toLocaleString();
       return await prisma.labReport.update({

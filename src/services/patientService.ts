@@ -15,7 +15,7 @@ export interface PatientProfileData {
 
 export const patientService = {
   async getAllPatients() {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const patients = await prisma.patient.findMany({
         include: {
@@ -50,7 +50,7 @@ export const patientService = {
 
   async getPatientById(id: string) {
     if (!id) throw new ValidationError('Patient ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const patient = await prisma.patient.findUnique({
         where: { id },
@@ -94,7 +94,7 @@ export const patientService = {
 
   async getPatientByMrn(mrn: string) {
     if (!mrn) throw new ValidationError('MRN is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const patient = await prisma.patient.findUnique({
         where: { mrn },
@@ -125,7 +125,7 @@ export const patientService = {
 
   async updatePatientMedicalHistory(patientId: string, medicalHistory: string, allergies?: string[]) {
     if (!patientId) throw new ValidationError('Patient ID is required');
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       const updated = await prisma.patient.update({
         where: { id: patientId },

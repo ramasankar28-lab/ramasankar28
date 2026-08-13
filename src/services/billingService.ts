@@ -19,7 +19,7 @@ export interface RecordPaymentInput {
 
 export const billingService = {
   async getBills(patientId?: string) {
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
     try {
       return await prisma.bill.findMany({
         where: patientId ? { patientId } : undefined,
@@ -36,7 +36,7 @@ export const billingService = {
 
   async createBill(input: CreateBillInput) {
     validateRequiredFields(input, ['patientId', 'serviceType', 'totalAmount']);
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
 
     try {
       const discount = Number(input.discountAmount) || 0;
@@ -67,7 +67,7 @@ export const billingService = {
 
   async recordPayment(input: RecordPaymentInput) {
     validateRequiredFields(input, ['billId', 'amount', 'paymentMethod']);
-    const prisma = getPrismaClient();
+    const prisma = getPrismaClient() as any;
 
     try {
       const bill = await prisma.bill.findUnique({ where: { id: input.billId }, include: { payments: true } });

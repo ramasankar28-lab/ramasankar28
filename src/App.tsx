@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/layout/Header';
+import { PriorityAlertBanner } from './components/notifications/PriorityAlertBanner';
 import { LandingPageModule } from './components/modules/LandingPageModule';
 import { OverviewDashboardModule } from './components/modules/OverviewDashboardModule';
 import { SmartQueueSystemModule } from './components/modules/SmartQueueSystemModule';
+import { AIQueuePredictionModule } from './components/modules/AIQueuePredictionModule';
 import { NavigationModule } from './components/modules/NavigationModule';
 import { DoctorScheduleModule } from './components/modules/DoctorScheduleModule';
 import { NurseStationModule } from './components/modules/NurseStationModule';
@@ -35,6 +37,7 @@ function MainAppContent() {
     else if (path.includes('/pharmacy/dashboard')) setActiveTab('pharmacy-dashboard');
     else if (path.includes('/login')) setActiveTab('login');
     else if (path.includes('/register')) setActiveTab('register');
+    else if (path.includes('/prediction')) setActiveTab('prediction');
 
     const handlePopState = () => {
       const p = window.location.pathname;
@@ -46,6 +49,7 @@ function MainAppContent() {
       else if (p.includes('/pharmacy/dashboard')) setActiveTab('pharmacy-dashboard');
       else if (p.includes('/login')) setActiveTab('login');
       else if (p.includes('/register')) setActiveTab('register');
+      else if (p.includes('/prediction')) setActiveTab('prediction');
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -63,6 +67,7 @@ function MainAppContent() {
     else if (tab === 'pharmacy-dashboard') targetPath = '/pharmacy/dashboard';
     else if (tab === 'login') targetPath = '/login';
     else if (tab === 'register') targetPath = '/register';
+    else if (tab === 'prediction') targetPath = '/prediction';
 
     if (window.location.pathname !== targetPath) {
       window.history.pushState({}, '', targetPath);
@@ -71,6 +76,9 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-slate-50/80 text-slate-900 font-sans flex flex-col antialiased">
+      {/* Priority Emergency Alert Bar */}
+      <PriorityAlertBanner />
+
       {/* Platform Navigation Header */}
       <Header activeTab={activeTab} setActiveTab={handleNavigateTab} />
 
@@ -87,6 +95,8 @@ function MainAppContent() {
         {activeTab === 'overview' && <OverviewDashboardModule onNavigateTab={handleNavigateTab} />}
 
         {activeTab === 'queue' && <SmartQueueSystemModule />}
+
+        {activeTab === 'prediction' && <AIQueuePredictionModule />}
 
         {activeTab === 'navigation' && <NavigationModule />}
 
